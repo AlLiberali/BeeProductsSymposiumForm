@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+	<meta charset="UTF-8">
+	<title>فرم مقالات سمپوزیوم</title>
+	<style>
+		body {
+			background-color: #ff9900;
+			text-align: center;
+		}
+		form {
+			width: 70%;
+			display: inline-block;
+			background-color: white;
+			border-radius: 20px;
+			padding: 20px;
+		}
+		table {
+			margin-left: auto;
+			margin-right: auto;
+			font-family: Nazanin;
+		}
+		label, th, p {
+			font-family: Nazanin;
+			color: black;
+		}
+		h2 {
+			font-family: Nazanin;
+			color: blue;
+		}
+		input, textarea {
+			border-radius: 10px;
+			padding-bottom: 5px;
+			font-family: Nazanin;
+		}
+		button {
+			background-color: #c0c0c0;
+			border-radius: 16px;
+			border-block-style: none;
+			transition: background-color 500ms ease-out 1ms;
+		}
+		button:hover {
+			background-color: blue;
+		}
+		button:disabled {
+			visibility: hidden;
+		}
+		img {
+			transition: filter 500ms ease-out 1ms;
+		}
+		img:hover {
+			filter: invert();
+		}
+		fieldset {
+			border-left-style: none;
+			border-right-style: none;
+		}
+		#title {
+			width: 50%;
+		}
+		#email {
+			width: 50%;
+		}
+		#abstract {
+			height: 100%;
+			width: 80%;
+			word-break: break-all;
+			resize: vertical;
+			border-radius: 10px;
+		}
+		#sub {
+			color: black;
+			font-family: Nazanin;
+			font-size: larger;
+			padding: 5px;
+			width: 20%;
+			transition: color 500ms ease-out 1ms;
+		}
+		#sub:hover {
+			color: white;
+		}
+	</style>
+	<script>
+		function loading() {
+			if (document.getElementById("authorSet").children.length == 1)
+				document.getElementById("removeAuthor").setAttribute("disabled", "");
+			if (document.getElementById("keywordSet").children.length == 1)
+				document.getElementById("removeKeyword").setAttribute("disabled", "");
+		}
+		function addAuthorListener() {
+			let set = document.getElementById("authorSet");
+			let clone = set.lastElementChild.cloneNode(true);
+			document.getElementById("removeAuthor").removeAttribute("disabled");
+			let index = parseInt(clone.lastElementChild.lastElementChild.value);
+			clone.lastElementChild.lastElementChild.checked = false;
+			let inserted = set.appendChild(clone);
+			inserted.removeAttribute("id");
+			index++;
+			inserted.lastElementChild.lastElementChild.value = index;
+			inserted.firstElementChild.innerText = index.toString().replaceAll('1', '\u06F1')
+				.replaceAll('2', '\u06F2')
+				.replaceAll('3', '\u06F3')
+				.replaceAll('4', '\u06F4')
+				.replaceAll('5', '\u06F5')
+				.replaceAll('6', '\u06F6')
+				.replaceAll('7', '\u06F7')
+				.replaceAll('8', '\u06F8')
+				.replaceAll('9', '\u06F9')
+				.replaceAll('0', '\u06F0');
+			inserted.children[1].children[0].value = "";
+			inserted.children[1].children[1].value = "";
+		}
+		function removeAuthorListener() {
+			let set = document.getElementById("authorSet");
+			if (set.children.length == 2) {
+				document.getElementById("removeAuthor").setAttribute("disabled", "");
+			}
+			set.removeChild(set.lastElementChild);
+		}
+		function addKeywordListener() {
+			let set = document.getElementById("keywordSet");
+			let clone = document.getElementById("keywordInit").cloneNode(true);
+			document.getElementById("removeKeyword").removeAttribute("disabled");
+			let inserted = set.appendChild(clone);
+			inserted.removeAttribute("id");
+			inserted.children[0].value = "";
+		}
+		function removeKeywordListener() {
+			let set = document.getElementById("keywordSet");
+			if (set.children.length == 2) {
+				document.getElementById("removeKeyword").setAttribute("disabled", "");
+			}
+			set.removeChild(set.lastElementChild);
+		}
+		function send() {
+			let title = document.getElementById("title").value;
+			let abstract = document.getElementById("abstract").value;
+			let email = document.getElementById("email").value;
+			let telephone = document.getElementById("telephone").value;
+			let keywords = document.getElementsByClassName("keyword");
+			let affiliations = document.getElementsByClassName("affiliation");
+			let names = document.getElementsByClassName("name");
+			let respondant = parseInt(document.querySelector("input[name=respondant]:checked")?.value);
+			let empty = title === "" || abstract === "" || email === "" || telephone === "" || isNaN(respondant);
+			let authorNames = [];
+			for (let i = 0; i < names.length; i++) {
+				if (names[i].value === "") {
+					empty = true;
+					break;
+				}
+				authorNames.push(names[i].value);
+			}
+			let authorAffiliations = [];
+			for (let i = 0; i < affiliations.length; i++) {
+				if (affiliations[i].value === "") {
+					empty = true;
+					break;
+				}
+				authorAffiliations.push(affiliations[i].value);
+			}
+			let keywordArray = [];
+			for (let i = 0; i < keywords.length; i++) {
+				if (keywords[i].value === "") {
+					empty = true;
+					break;
+				}
+				keywordArray.push(keywords[i].value);
+			}
+			if (empty) {
+				alert("همه موارد الزامی است. لطفا فرم را تکمیل کنید.\nدر صورت اضافی بودن ورودی برای اسامی نویسندگان یا کلمات کلیدی می\u200Cتوانید از دکمه منفی مربوطه استفاده کنید.");
+				return;
+			}
+			let obj = {
+				Title: title,
+				Respondant: respondant - 1,
+				Authors: authorNames,
+				Affiliations: authorAffiliations,
+				Email: email,
+				Telephone: telephone,
+				Abstract: abstract,
+				Keywords: keywordArray
+			};
+			let form = document.getElementById("form");
+			let xhr = new XMLHttpRequest();
+			let url = "https://beeproductsymposium.freehost.io//entry.php";
+			let res = "";
+			xhr.open("POST", url, true);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					let h2 = document.createElement("h2");
+					h2.innerText = "ارسال شد! شماره مقاله: " + xhr.responseText;
+					document.getElementById("form").parentElement.appendChild(h2);
+				}
+			};
+			xhr.send(JSON.stringify(obj));
+			let es = document.getElementsByTagName("input");
+			for (let i = 0; i < es.length; i++) es[i].setAttribute("disabled", "");
+			es = document.getElementsByTagName("button");
+			for (let i = 0; i < es.length; i++) es[i].setAttribute("disabled", "");
+			es = document.getElementsByTagName("textarea");
+			for (let i = 0; i < es.length; i++) es[i].setAttribute("disabled", "");
+		}
+	</script>
+</head>
+<body onload="loading()">
+	<link rel="preconnect" href="//fdn.fontcdn.ir">
+	<link rel="preconnect" href="//v1.fontapi.ir">
+	<link href="https://v1.fontapi.ir/css/Nazanin" rel="stylesheet">
+	<form id="form">
+		<p>لطفا اطلاعات به فارسی وارد شوند. همچنین اسامی نویسندگان و کلمات کلیدی به تفکیک وارد شوند.</p>
+		<label for="title">عنوان مقاله</label><br />
+		<input type="text" id="title" required placeholder="بررسی تغییرات انرژی آزاد گیبس بین شریان و ورید و تأثیر آن بر میدان مغناطیسی زمین"><br>
+		<table>
+			<thead>
+				<tr>
+					<th style="width: fit-content;">
+						<button type="button" id="addAuthor" onclick="addAuthorListener()"><img style="height: 16px; width: 16px" src="AddButton.png" /></button>
+						<button type="button" id="removeAuthor" onclick="removeAuthorListener()"><img style="height: 16px; width: 16px" src="RemoveButton.png" /></button>
+					</th>
+					<th style="width: 83%;">اسامی نویسندگان</th>
+					<th style="width: fit-content">نویسنده مسئول</th>
+				</tr>
+			</thead>
+			<tbody id="authorSet">
+				<tr class="authorCombo">
+					<td>&#x6F1</td>
+					<td>
+						<input type="text" class="name" required placeholder="نادر جعفری" style="width: 20%">
+						<input type="text" class="affiliation" required placeholder="دانشجوی کارشناسی بوزون شناسی تکوینی دانشگاه محدود واحد بغداد" style="width: 75%;">
+					</td>
+					<td>
+						<input type="radio" name="respondant" value="1"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<label for="email">ایمیل نویسنده مسئول</label><br />
+		<input type="email" id="email" required style="width: 50%" placeholder="person@university.ac.tld" dir="ltr"><br>
+		<label for="telephone">تلفن نویسنده مسئول</label><br />
+		<input type="tel" id="telephone" required style="width: 50%" placeholder="09012345678" dir="ltr"><br>
+
+		<label for="abstract">چکیده</label><br />
+		<textarea id="abstract" rows="10" required></textarea><br>
+
+		<label for="keywordSet">کلمات کلیدی</label>
+		<button type="button" id="addKeyword" onclick="addKeywordListener()"><img style="height: 16px; width: 16px" src="AddButton.png" /></button>
+		<button type="button" id="removeKeyword" onclick="removeKeywordListener()"><img style="height: 16px; width: 16px" src="RemoveButton.png" /></button>
+		<br />
+		<fieldset id="keywordSet">
+			<div id="keywordInit">
+				<input type="text" class="keyword" required placeholder="شریان"><br>
+			</div>
+		</fieldset>
+		<button type="button" id="sub" onclick="send()">ارسال</button>
+	</form>
+</body>
+</html>
