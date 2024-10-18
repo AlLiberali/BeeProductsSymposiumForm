@@ -1,4 +1,4 @@
-const DEBUG = true;
+const DEBUG = false;
 const BASE_URL = "https://symposium.modsec.uk.eu.org/";
 function init() {
 	isAlive();
