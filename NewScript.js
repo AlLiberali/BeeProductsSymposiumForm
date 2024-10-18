@@ -16,7 +16,7 @@ function isAlive() {
 	if (DEBUG)
 		func(0);
 	else
-		fetch(BASE_URL + "isAlive", { mode: "no-cors" })
+		fetch(BASE_URL + "isAlive")
 			.then(response => response.status === 200 ? response.text() : "127", null)
 			.then(t => parseInt(t), null)
 			.then(func, null);
